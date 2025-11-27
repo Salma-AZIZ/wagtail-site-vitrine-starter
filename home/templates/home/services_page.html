@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% load wagtailimages_tags %}
+
+{% block title %}Nos services - Mon site vitrine{% endblock %}
+
+{% block content %}
+<section>
+    <div class="container">
+        <!-- Titre et sous-titre venant du modèle -->
+        <h1 class="section-title">
+            {{ page.intro_title|default:"Nos services" }}
+        </h1>
+        <p class="section-subtitle">
+            {{ page.intro_subtitle|default:"Retrouvez ici la liste complète des services proposés." }}
+        </p>
+
+        <div style="margin-top:2rem; display:grid; gap:1.5rem; grid-template-columns:repeat(auto-fit,minmax(260px,1fr));">
+            {% if page.services %}
+                {% for block in page.services %}
+                    {% if block.block_type == "service" %}
+                        {% with service=block.value %}
+                            <article style="background:white; border-radius:1rem; padding:1.5rem; border:1px solid #e5e7eb;">
+                                {% if service.image %}
+                                    <div style="border-radius:0.9rem; overflow:hidden; margin-bottom:0.75rem;">
+                                        {% image service.image fill-600x350 %}
+                                    </div>
+                                {% endif %}
+
+                                {% if service.badge %}
+                                    <div style="font-size:0.8rem; text-transform:uppercase; letter-spacing:0.12em; color:#2563eb; margin-bottom:0.35rem;">
+                                        {{ service.badge }}
+                                    </div>
+                                {% endif %}
+
+                                <h2 style="font-size:1.15rem; margin-bottom:0.5rem;">
+                                    {{ service.title }}
+                                </h2>
+
+                                {% if service.description %}
+                                    <p style="font-size:0.95rem; color:#4b5563; margin-bottom:0.75rem;">
+                                        {{ service.description }}
+                                    </p>
+                                {% endif %}
+
+                                {% if service.features %}
+                                    <ul style="font-size:0.9rem; color:#6b7280; margin-left:1.1rem;">
+                                        {% for feature in service.features %}
+                                            <li>{{ feature }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </article>
+                        {% endwith %}
+                    {% endif %}
+                {% endfor %}
+            {% else %}
+                <p style="color:#6b7280; font-size:0.95rem;">
+                    Aucun service n’a encore été ajouté. Vous pouvez créer vos services dans l’admin Wagtail pour les voir apparaître ici.
+                </p>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}
