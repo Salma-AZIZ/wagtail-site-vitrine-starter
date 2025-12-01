@@ -9,12 +9,11 @@ Remplace dans toutes les commandes :
 * **TON_PROJET** → nom du projet Django/Wagtail (dossier contenant `settings/`)
 * **USERNAME** → nom de ton compte PythonAnywhere
 
+# 0. Préparer le projet pour le déploiement
 
-## 🔧 **0. Préparer le projet pour le déploiement**
+### 1) Code sur GitHub
 
-### 1) Projet sur GitHub
-
-Ton projet Wagtail doit être sur GitHub, avec un `.gitignore` qui exclut :
+Votre projet Wagtail doit être sur GitHub, avec un `.gitignore` qui exclut les fichiers locaux :
 
 ```
 venv/
@@ -23,58 +22,62 @@ db.sqlite3
 media/
 ```
 
-### 2) requirements.txt
+### 2) Préparer requirements.txt
 
-Exemple recommandé :
+Voici un exemple adapté au déploiement :
 
 ```
 Django>=5.2,<5.3
 wagtail>=7.1,<7.2
+
 gunicorn
 whitenoise
+
 psycopg[binary]
 Pillow
 ```
 
+# 1. Créer un compte PythonAnywhere
+
+1. Aller sur :
+   [https://www.pythonanywhere.com/registration/register/beginner/](https://www.pythonanywhere.com/registration/register/beginner/)
+2. Choisir votre **USERNAME** (exemple : `monapp2025`)
+   ➜ Votre site sera accessible ici :
+   `https://USERNAME.pythonanywhere.com/`
+3. Valider l’email.
 
 
-# 1. **Créer un compte PythonAnywhere**
+# 2. Créer une nouvelle Web App
 
-1. Aller sur : [https://www.pythonanywhere.com/registration/register/beginner/](https://www.pythonanywhere.com/registration/register/beginner/)
-2. Choisir un `USERNAME`
-3. Confirmer votre email
-
-➡️ Votre site sera visible ici :
-`https://USERNAME.pythonanywhere.com/`
-
-
-
-# 2. **Créer une Web App**
-
-1. Menu **Web**
-2. **Add a new web app**
-3. Domaine proposé : `USERNAME.pythonanywhere.com`
+1. Aller dans **Web** (menu en haut).
+2. Cliquer sur **Add a new web app**.
+3. Accepter le domaine proposé :
+   `USERNAME.pythonanywhere.com`
 4. Choisir :
 
-   * **Manual configuration**
-   * **Python 3.13** (ou version récente)
+   * *Manual configuration*
+   * *Python 3.13* (ou version récente)
+5. Valider.
 
+# 3. Cloner votre projet GitHub
 
-
-# 3. **Cloner votre projet GitHub**
-
-Menu **Files** → **Open Bash console**
+1. Aller dans **Files**
+2. Cliquer sur **Open Bash console here**
+3. Taper :
 
 ```bash
 git clone https://github.com/TON_COMPTE/TON_REPO.git
 ```
 
-Le projet sera dans :
-`/home/USERNAME/TON_REPO/`
+Cela crée le dossier :
 
+```
+/home/USERNAME/TON_REPO/
+```
 
+# 4. Créer un virtualenv + installer les dépendances
 
-# 4. **Créer un environnement virtuel + installer les dépendances**
+Dans la console Bash :
 
 ```bash
 cd /home/USERNAME
@@ -83,11 +86,9 @@ source venv/bin/activate
 pip install -r TON_REPO/requirements.txt
 ```
 
+# 5. Configurer les settings de production
 
-
-# 5. **Configurer les settings de production**
-
-Dans `TON_PROJET/settings/`, vous devez avoir :
+Dans **Files → TON_REPO → TON_PROJET → settings**, vous devez avoir :
 
 * `base.py`
 * `dev.py`
@@ -101,6 +102,8 @@ Dans `dev.py` ou `base.py` :
 SECRET_KEY = "votre_cle_secrete"
 ```
 
+Copiez-la.
+
 ### b) Modifier `production.py`
 
 Exemple recommandé :
@@ -109,6 +112,9 @@ Exemple recommandé :
 from .base import *
 
 DEBUG = False
+
+# Optionnel : désactiver ManifestStaticFilesStorage pour simplifier la formation
+# STORAGES["staticfiles"]["BACKEND"] = "django.contrib.staticfiles.storage.ManifestStaticFilesStorage"
 
 SECRET_KEY = "COLLER_ICI_LA_SECRET_KEY"
 
@@ -124,11 +130,12 @@ except ImportError:
     pass
 ```
 
-➡️ Remplacer `USERNAME` par votre vrai compte.
+Remplacer **USERNAME** par votre nom PythonAnywhere.
 
 
+# 6. Créer la base de données de production
 
-# 6. **Créer la base de données en production**
+Dans une console Bash :
 
 ```bash
 cd /home/USERNAME/TON_REPO/
@@ -136,44 +143,46 @@ source ../venv/bin/activate
 python manage.py migrate
 ```
 
-
-# 7. **Créer le superuser**
+# 7. Créer le superuser
 
 ```bash
 python manage.py createsuperuser
 ```
 
-Si Django affiche :
+⚠️ Si Django affiche :
 
 > Bypass password validation and create user anyway? (y/N)
 
-Répondez **y**.
+Répondez `y`.
 
 
-
-# 8. **Collecter les fichiers statiques**
+# 8. Collecter les fichiers statiques
 
 ```bash
 python manage.py collectstatic
 ```
 
-Répondre **yes**.
+Taper `yes` si demandé.
 
 
+# 9️. Configurer la Web App (onglet Web)
 
-# 9. **Configurer la Web App (menu Web)**
+## A) Associer le virtualenv
 
-### A) Associer le virtualenv
-
-Web → **Virtualenv** →
+Dans **Web → Virtualenv**, mettre :
 
 ```
 /home/USERNAME/venv
 ```
 
-### B) Modifier le fichier WSGI
+Valider (bouton ✔).
 
-Menu Web → **WSGI configuration file** → ouvrir → remplacer tout par :
+
+## B) Configurer le fichier WSGI
+
+Dans **Web**, section **WSGI configuration file** → ouvrir le fichier.
+
+Remplacer tout par :
 
 ```python
 import os
@@ -192,17 +201,18 @@ from django.core.wsgi import get_wsgi_application
 application = get_wsgi_application()
 ```
 
-➡️ Remplacer :
+➡ Remplacer :
 
-* USERNAME
-* TON_REPO
-* TON_PROJET
+* **USERNAME**
+* **TON_REPO**
+* **TON_PROJET.settings.production**
+
+Sauvegarder.
 
 
+# 10. Configurer les Static files et Media files
 
-# 10. **Configurer Static & Media**
-
-Dans `base.py` :
+### Vérifier dans `base.py` :
 
 ```python
 STATIC_URL = "/static/"
@@ -212,55 +222,57 @@ MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 ```
 
-### Dans Web → Static files :
+### Ensuite dans **Web → Static files** :
 
-#### ✔ Fichiers statiques
+Ajouter deux lignes :
+
+1) **Fichiers statiques**
 
 * URL : `/static/`
 * Directory : `/home/USERNAME/TON_REPO/static/`
 
-#### ✔ Fichiers media
+2) **Fichiers médias (images uploadées)**
 
 * URL : `/media/`
 * Directory : `/home/USERNAME/TON_REPO/media/`
 
-Enregistrer.
+Enregistrer avec **Save**.
 
 
+# 11. Redémarrer la Web App
 
-# 11. **Redémarrer la Web App**
-
-Bouton **Reload** en haut.
-
+En haut → bouton **Reload**.
 
 
-# 12. **Tester votre site**
+# 12. Tester l’application
 
-### Site public
-
+👉 Site public :
 `https://USERNAME.pythonanywhere.com/`
 
-### Admin
-
+👉 Interface Admin :
 `https://USERNAME.pythonanywhere.com/admin/`
 
+Connectez-vous avec votre superuser.
+
+# 13. Finaliser le contenu en production
+
+⚠️ IMPORTANT
+Les contenus créés en local ne sont **pas copiés** automatiquement.
+La base SQLite de production est **neuve**.
+
+Créer les pages en production via `/admin/` :
+
+1. Menu **Pages**
+2. Cliquer sur **Home**
+3. **Add child page**
+4. Choisir un type (Blog, About, Contact…)
+5. Remplir → **Publish**
+
+Pour les images :
+
+* **Images → Add image**
+* Puis insérer l’image dans vos pages.
 
 
-# 13. **Créer les pages en production (IMPORTANT)**
-
-La base de production est **vide**.
-
-Dans `/admin/` :
-
-1. Pages → Home
-2. Add child page
-3. Choisir un type (Home, About, Contact, etc.)
-4. Publier
-
-### Ajouter les images
-
-Admin → Images → **Add image**
-
-
-# 🎉 **Votre site Wagtail est maintenant en production !**
+# 🎉 Votre site Wagtail est maintenant en production !
 
