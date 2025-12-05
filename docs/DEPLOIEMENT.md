@@ -28,7 +28,7 @@ Voici un exemple adapté au déploiement :
 
 ```
 Django>=5.2,<5.3
-wagtail>=7.1,<7.2
+wagtail>=7.2,<7.3
 
 python-dotenv
 
