@@ -173,7 +173,7 @@ Dans PythonAnywhere, il n’y a **pas** de section “Environment variables”.
 Vous devez ajouter les variables directement dans votre fichier **WSGI**.
 
 1. Aller dans **Web → WSGI configuration file** (`/var/www/..._wsgi.py`)
-2. En haut du fichier, ajouter :
+2. En haut du fichier, ajouter le code suivant. Si le fichier contient encore le contenu par défaut fourni par PythonAnywhere, le supprimer au préalable :
 
 ```python
 import os
@@ -183,8 +183,6 @@ os.environ["EMAIL_HOST_PASSWORD"] = "TON_MDP_APPLICATION_GMAIL"
 ```
 
 ➡️ Remplacez par votre adresse Gmail et **votre mot de passe d’application Gmail**.
-
-3. Enregistrer puis cliquer sur **Reload** de la Web App.
 
 ### ⚠️ **Points importants**
 
@@ -201,31 +199,6 @@ Toujours utiliser :
 ```python
 os.environ.get("EMAIL_HOST_PASSWORD")
 ```
-
-#### 3️⃣ Vérifier que la configuration fonctionne
-
-Dans une console Bash sur PythonAnywhere :
-
-```bash
-python manage.py shell
-```
-
-Puis :
-
-```python
-from django.conf import settings
-print(settings.EMAIL_HOST_USER)
-print(settings.EMAIL_HOST_PASSWORD is not None)
-```
-
-Vous devez obtenir :
-
-```
-ton_email@gmail.com
-True
-```
-
-Votre formulaire **Contact** peut maintenant envoyer des emails en production, exactement comme en local.
 
 # 6. Créer la base de données de production
 
@@ -276,7 +249,7 @@ Valider (bouton ✔).
 
 Dans **Web**, section **WSGI configuration file** → ouvrir le fichier.
 
-Remplacer tout par :
+Ajouter le code ci-dessous. Si le fichier contient encore le contenu par défaut de PythonAnywhere, vous pouvez le supprimer, sauf la configuration Gmail si elle a déjà été ajoutée :
 
 ```python
 import os
@@ -306,7 +279,17 @@ Sauvegarder.
 
 # 10. Configurer les Static files et Media files
 
-### Vérifier dans `base.py` :
+### Vérifier la configuration dans `base.py`:
+
+Vérifier que le module os est bien importé en haut du fichier.
+Si ce n’est pas le cas, ajoutez :
+
+```python
+import os
+```
+
+Ensuite, vérifiez les paramètres liés aux fichiers statiques et médias.
+Si nécessaire, remplacez les lignes existantes par la configuration suivante :
 
 ```python
 STATIC_URL = "/static/"
